@@ -41,3 +41,6 @@ htmlcov/
 reddit_profile/
 chroma_db/
 potter.txt
+
+.env
+.hypothesis/
