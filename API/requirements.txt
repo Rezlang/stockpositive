@@ -9,3 +9,4 @@ mistralai>=1.9.11
 pytest-playwright>=0.7.2
 psycopg>=3.3.2
 twelvedata>=1.2.25
+yfinance>=0.2.66
