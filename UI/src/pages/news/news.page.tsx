@@ -1,21 +1,15 @@
-import StockChart from './components/stock-chart.component'
-import NewsFeed from './components/news-feed.component'
-import SelectableOptions from './components/feed-selector.component'
+import { NewsFeed } from './components/news-feed.component'
 
-function Candles() {
+function NewsPage() {
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Candles Page</h1>
-      <StockChart />
-
-      <div style={{ marginTop: '40px' }}>
+    <div style={{
+      marginTop: '40px',
+      textAlign: 'center',
+    }}>
         <h2>Related News</h2>
-        <NewsFeed />
+        <NewsFeed cardsPerRow={2} />
       </div>
-
-      <SelectableOptions />
-    </div>
   )
 }
 
-export default Candles
+export default NewsPage

@@ -1,11 +1,16 @@
-// src/App.tsx
-import React from 'react'
 import { useRoutes } from 'react-router-dom'
 import routes from './routes'
+import AppHeader from './components/app-header'
 
 function App() {
   const element = useRoutes(routes)
-  return element
+
+  return (
+    <>
+      <AppHeader />
+      {element}
+    </>
+  )
 }
 
 export default App
