@@ -1,4 +1,4 @@
-import { NewsFeed } from './components/news-feed.component'
+import NewsFeed from "./components/news-feed.component"
 
 function NewsPage() {
   return (
