@@ -1,15 +1,15 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink } from "react-router-dom";
 
 type HeaderItem = {
-  label: string
-  to: string
-}
+  label: string;
+  to: string;
+};
 
 const headerItems: HeaderItem[] = [
-  { label: 'News', to: '/news' },
-  { label: 'Stock Chart', to: '/stock-chart' },
-  { label: 'Feed Options', to: '/feed-options' },
-]
+  { label: "News", to: "/news" },
+  { label: "Stock Chart", to: "/stock-chart" },
+  { label: "Feed Options", to: "/feed-options" },
+];
 
 function AppHeader() {
   return (
@@ -21,8 +21,8 @@ function AppHeader() {
             to={item.to}
             style={({ isActive }) => ({
               ...styles.link,
-              fontWeight: isActive ? 'bold' : 'normal',
-              textDecoration: isActive ? 'underline' : 'none',
+              fontWeight: isActive ? "bold" : "normal",
+              textDecoration: isActive ? "underline" : "none",
             })}
           >
             {item.label}
@@ -30,21 +30,21 @@ function AppHeader() {
         ))}
       </nav>
     </header>
-  )
+  );
 }
 
 const styles = {
   header: {
-    padding: '12px 16px',
-    borderBottom: '1px solid #ddd',
+    padding: "12px 16px",
+    borderBottom: "1px solid #ddd",
   },
   nav: {
-    display: 'flex',
-    gap: '16px',
+    display: "flex",
+    gap: "16px",
   },
   link: {
-    color: '#000',
+    color: "#000",
   },
-}
+};
 
-export default AppHeader
+export default AppHeader;

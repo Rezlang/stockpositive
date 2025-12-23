@@ -1,0 +1,9 @@
+CREATE TABLE UserFeeds (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    feedname VARCHAR(100) NOT NULL,
+    stocks JSON NOT NULL,
+    sources JSON NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+);

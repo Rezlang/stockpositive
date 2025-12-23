@@ -1,15 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Checkbox,
-  Button,
-  Typography,
-  Divider,
-} from '@mui/joy';
-import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
-import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown';
-import type { TreeNode } from '../constants/source-options.constant';
-import { SOURCEOPTIONS } from '../constants/source-options.constant';
+import React, { useState, useEffect } from "react";
+import { Box, Checkbox, Button, Typography, Divider } from "@mui/joy";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
+import type { TreeNode } from "../constants/source-options.constant";
+import { SOURCEOPTIONS } from "../constants/source-options.constant";
 
 /* ---------- Helpers ---------- */
 
@@ -63,22 +57,22 @@ const SourceOptions: React.FC = () => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const renderTags = (tags?: TreeNode['tags']) => {
+  const renderTags = (tags?: TreeNode["tags"]) => {
     if (!tags || tags.length === 0) return null;
     return (
-      <Box sx={{ display: 'flex', gap: 0.5, ml: 1 }}>
+      <Box sx={{ display: "flex", gap: 0.5, ml: 1 }}>
         {tags.map((tag) => (
           <Box
             key={tag}
             sx={{
               px: 1,
-              py: '2px',
-              borderRadius: '999px',
-              fontSize: '0.7rem',
-              fontWeight: 'bold',
-              textTransform: 'uppercase',
-              color: tag === 'promoted' ? 'white' : 'black',
-              backgroundColor: tag === 'promoted' ? 'green' : 'gold',
+              py: "2px",
+              borderRadius: "999px",
+              fontSize: "0.7rem",
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              color: tag === "promoted" ? "white" : "black",
+              backgroundColor: tag === "promoted" ? "green" : "gold",
             }}
           >
             {tag}
@@ -96,8 +90,8 @@ const SourceOptions: React.FC = () => {
       <Box key={node.id}>
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
+            display: "flex",
+            alignItems: "center",
             pl: depth * 3,
             py: 0.5,
             minHeight: 30,
@@ -111,13 +105,13 @@ const SourceOptions: React.FC = () => {
 
           <Typography
             component="div"
-            level={depth === 0 ? 'title-sm' : 'body-sm'}
+            level={depth === 0 ? "title-sm" : "body-sm"}
             sx={{
               flexGrow: 1,
               paddingLeft: 2,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
             }}
             onClick={() => {
               if (hasChildren) {
@@ -131,14 +125,19 @@ const SourceOptions: React.FC = () => {
             {renderTags(node.tags)}
 
             {hasChildren && (
-              <Box component="span" sx={{ ml: 1, display: 'flex', alignItems: 'center' }}>
+              <Box
+                component="span"
+                sx={{ ml: 1, display: "flex", alignItems: "center" }}
+              >
                 {isOpen ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
               </Box>
             )}
           </Typography>
         </Box>
         {hasChildren && isOpen && (
-          <Box>{node.children!.map((child) => renderNode(child, depth + 1))}</Box>
+          <Box>
+            {node.children!.map((child) => renderNode(child, depth + 1))}
+          </Box>
         )}
 
         {depth === 0 && <Divider sx={{ my: 1 }} />}
@@ -151,13 +150,20 @@ const SourceOptions: React.FC = () => {
       .filter(([, value]) => value)
       .map(([key]) => key);
 
-    console.log('Selected leaf nodes:', selected);
+    console.log("Selected leaf nodes:", selected);
   };
 
   return (
     <Box sx={{ maxWidth: 500 }}>
       {SOURCEOPTIONS.map((node) => renderNode(node))}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, paddingBottom: 10 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mt: 2,
+          paddingBottom: 10,
+        }}
+      >
         <Button onClick={handleSubmit}>Submit</Button>
       </Box>
     </Box>
