@@ -80,21 +80,3 @@ def get_current_active_user(current_user: UserORM = Depends(get_current_user)) -
         raise HTTPException(status_code=400, detail="Inactive user")
     print("Permissions:", current_user.permissions)
     return current_user
-
-
-def require_permissions(required_permissions: List[str]):
-    """
-    Dependency to enforce that the current user has all required permissions.
-    Usage:
-        @router.get("/some-route", dependencies=[Depends(require_permissions(["perm1","perm2"]))])
-    """
-    def permission_checker(current_user: UserORM = Depends(get_current_active_user)):
-        # assuming your UserORM has a 'permissions' attribute that is a list of strings
-        user_permissions = set(current_user.permissions or [])
-        if not set(required_permissions).issubset(user_permissions):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Required permissions: {required_permissions}"
-            )
-        return True  # can be ignored; just ensures the dependency passes
-    return Depends(permission_checker)
