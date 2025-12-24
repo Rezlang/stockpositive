@@ -1,4 +1,4 @@
-CREATE TABLE NewsArticles (
+CREATE TABLE news (
     id SERIAL PRIMARY KEY,
     title TEXT,
     description TEXT,

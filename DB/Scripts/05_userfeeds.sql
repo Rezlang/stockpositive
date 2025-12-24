@@ -1,4 +1,4 @@
-CREATE TABLE UserFeeds (
+CREATE TABLE userfeeds (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
     feedname VARCHAR(100) NOT NULL,

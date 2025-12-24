@@ -1,4 +1,4 @@
-INSERT INTO UserFeeds (user_id, feedname, stocks, sources)
+INSERT INTO userfeeds (user_id, feedname, stocks, sources)
 VALUES 
 (1, 'Tech Stocks', '["AAPL","GOOG","MSFT"]', '["Yahoo Finance","Bloomberg"]'),
 (2, 'Energy Stocks', '["XOM","CVX"]', '["Reuters","CNBC"]'),

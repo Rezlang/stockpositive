@@ -6,8 +6,9 @@ from datetime import datetime
 import os
 import requests
 import re
-from ORM.newsArticle import NewsArticle
+from ORM.newsArticleORM import NewsArticleORM
 from models.newsResponse import NewsResponse
+from models.newsArticle import NewsArticle
 
 env_path = Path('../') / '.env'
 load_dotenv(dotenv_path=env_path)
@@ -44,7 +45,7 @@ def retrieve_news(
 
     data = response.json()
 
-    articles: List[NewsArticle] = []
+    articles: List[NewsArticleORM] = []
     for item in data.get("results", []):
         pubdate = item.get("pubDate")
         if pubdate and isinstance(pubdate, str):
@@ -73,7 +74,7 @@ def retrieve_news(
         elif symbol:
             symbol = [s.upper() if isinstance(s, str) else s for s in symbol]
 
-        article = NewsArticle(
+        article = NewsArticleORM(
             title=item.get("title"),
             description=item.get("description"),
             content=item.get("content"),
@@ -81,7 +82,7 @@ def retrieve_news(
             imagelink=item.get("image_url"),
             keywords=keywords,
             creator=creator,
-            symbol=symbol,
+            symbols=symbol,
             pubdate=pubdate,
             sourcename=normalize_source_name(
                 item.get("source_name")),
@@ -90,8 +91,4 @@ def retrieve_news(
         )
         articles.append(article)
 
-    return NewsResponse(
-        status=data.get("status", "error"),
-        total_results=data.get("totalResults", 0),
-        results=articles,
-    )
+    return articles

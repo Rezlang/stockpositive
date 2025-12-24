@@ -1,4 +1,4 @@
-from ORM.newsArticle import NewsArticle
+from models.newsArticle import NewsArticle
 from typing import List
 from pydantic import BaseModel
 

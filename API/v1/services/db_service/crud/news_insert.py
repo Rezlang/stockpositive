@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
-from ORM.newsArticle import NewsArticle
+from ORM.newsArticleORM import NewsArticleORM
 from services.db_service.database import get_db
 from fastapi import Depends
 
 
-def create_news_article(article: NewsArticle, db: Session) -> NewsArticle:
+def create_news_article(article: NewsArticleORM, db: Session) -> NewsArticleORM:
     db.add(article)
     db.commit()
     db.refresh(article)
