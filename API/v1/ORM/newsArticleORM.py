@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Text, DateTime, Integer
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from .base import Base
 
 
 class NewsArticleORM(Base):

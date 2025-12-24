@@ -27,6 +27,7 @@ class UserResponse(UserBase):
     usergroup_id: int
     is_active: bool
     created_at: datetime
+    permissions: List[str]
 
     class Config:
         from_atributes = True

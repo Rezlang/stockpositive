@@ -9,11 +9,14 @@ from services.db_service.crud.news_insert import create_news_article
 from services.db_service.crud.news_get import get_news_for_feed
 from services.db_service.database import get_db
 from fastapi import Depends
+from services.auth_service import require_permissions
 
 router = APIRouter()
 
 
-@router.get("/load-news", response_model=List[NewsArticle])
+@router.get("/load-news",
+            response_model=List[NewsArticle],
+            dependencies=[require_permissions(["LOAD.NEWS"])])
 def load_market_news(
     source: str = "market",
     symbols: Optional[List[str]] = Query(default=None),

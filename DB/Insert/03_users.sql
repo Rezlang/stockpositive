@@ -7,14 +7,14 @@ INSERT INTO users (
 )
 VALUES
 (
-    (SELECT id FROM usergroups WHERE name = 'user'),
+    (SELECT id FROM usergroups WHERE name = 'admin'),
     'testuser',
-    'test@example.com',
+    'test@test.com',
     '1234567890',
-    '$2b$12$u8TUnD0vhJERde8CbK9ZXu3ohQKSuxMCFMsHFKraOHtXtrzBqOLU6'
+    '$2b$12$g8FSRzt.Q47ZOH4bUvnoCeZ4KOWU.LfwbGiPecI8fhvu86w4NJelS'
 ),
 (
-    (SELECT id FROM usergroups WHERE name = 'admin'),
+    (SELECT id FROM usergroups WHERE name = 'user'),
     'adminuser',
     'admin@example.com',
     '1112223333',
