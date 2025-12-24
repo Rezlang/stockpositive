@@ -1,26 +1,24 @@
-from sqlalchemy import Column, Integer, String, Table, ForeignKey
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from .base import Base
-
-# Association table
-usergroup_permissions = Table(
-    "usergroup_permissions",
-    Base.metadata,
-    Column("id", Integer, primary_key=True, index=True),
-    Column("usergroup_id", Integer, ForeignKey("usergroups.id")),
-    Column("permission_id", Integer, ForeignKey("permissions.id"))
-)
 
 
 class UserGroupORM(Base):
     __tablename__ = "usergroups"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True, nullable=False)
-    description = Column(String(255), nullable=True)
+    description = Column(String(255))
 
+    permission_links = relationship(
+        "UserGroupPermissionORM",
+        back_populates="usergroup",
+        cascade="all, delete-orphan"
+    )
+
+    # Optional convenience access
     permissions = relationship(
-        "PermissionORM",  # string reference avoids circular import
-        secondary=usergroup_permissions,
-        backref="usergroups"
+        "PermissionORM",
+        secondary="usergroup_permissions",
+        viewonly=True
     )

@@ -33,7 +33,9 @@ def load_market_news(
     return articles
 
 
-@router.get("/get-news", response_model=List[NewsArticle])
+@router.get("/get-news",
+            response_model=List[NewsArticle],
+            dependencies=[require_permissions(["GET.NEWS"])])
 def get_market_news(
     feedId: int,
     db: Session = Depends(get_db)

@@ -1,26 +1,42 @@
--- admin has all permissions
-INSERT INTO usergroup_permissions (usergroup_id, permission_id)
-SELECT ug.id, p.id
+-- Admin permissions
+INSERT INTO usergroup_permissions (usergroup_id, permission_id, permission_value)
+SELECT ug.id, p.id,
+       CASE p.name
+           WHEN 'ADD.FEED' THEN -2
+           ELSE -1
+       END
 FROM usergroups ug
-JOIN permissions p ON ug.name = 'admin';
+JOIN permissions p
+  ON ug.name = 'admin';
 
--- user has read only
-INSERT INTO usergroup_permissions (usergroup_id, permission_id)
-SELECT ug.id, p.id
+-- User permissions
+INSERT INTO usergroup_permissions (usergroup_id, permission_id, permission_value)
+SELECT ug.id, p.id,
+       CASE p.name
+           WHEN 'GET.NEWS' THEN -1
+           WHEN 'GET.FEEDS' THEN -1
+           WHEN 'ADD.FEED' THEN 5
+           WHEN 'EDIT.FEED' THEN -1
+           WHEN 'DELETE.FEED' THEN -1
+           ELSE NULL
+       END
 FROM usergroups ug
-JOIN permissions p ON ug.name = 'user' AND p.name = 'GET.NEWS';
+JOIN permissions p
+  ON ug.name = 'user'
+WHERE p.name IN ('GET.NEWS', 'GET.FEEDS', 'ADD.FEED', 'EDIT.FEED', 'DELETE.FEED');
 
-INSERT INTO usergroup_permissions (usergroup_id, permission_id)
-SELECT ug.id, p.id
+-- Free permissions
+INSERT INTO usergroup_permissions (usergroup_id, permission_id, permission_value)
+SELECT ug.id, p.id,
+       CASE p.name
+           WHEN 'GET.NEWS' THEN -1
+           WHEN 'GET.FEEDS' THEN -1
+           WHEN 'ADD.FEED' THEN 2
+           WHEN 'EDIT.FEED' THEN -1
+           WHEN 'DELETE.FEED' THEN -1
+           ELSE NULL
+       END
 FROM usergroups ug
-JOIN permissions p ON ug.name = 'user' AND p.name = 'WRITE.FEED.5';
-
-INSERT INTO usergroup_permissions (usergroup_id, permission_id)
-SELECT ug.id, p.id
-FROM usergroups ug
-JOIN permissions p ON ug.name = 'free' AND p.name = 'GET.NEWS';
-
-INSERT INTO usergroup_permissions (usergroup_id, permission_id)
-SELECT ug.id, p.id
-FROM usergroups ug
-JOIN permissions p ON ug.name = 'free' AND p.name = 'WRITE.FEED.2';
+JOIN permissions p
+  ON ug.name = 'free'
+WHERE p.name IN ('GET.NEWS', 'GET.FEEDS', 'ADD.FEED', 'EDIT.FEED', 'DELETE.FEED');

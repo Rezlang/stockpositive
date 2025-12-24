@@ -1,7 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
-from models.userFeed import UserFeed
 
 
 class UserBase(BaseModel):
@@ -27,7 +26,7 @@ class UserResponse(UserBase):
     usergroup_id: int
     is_active: bool
     created_at: datetime
-    permissions: List[str]
+    permissions: dict[str, Optional[int]]
 
     class Config:
         from_atributes = True
