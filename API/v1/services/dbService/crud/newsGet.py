@@ -57,9 +57,7 @@ def get_news_for_feed(feed_id: int, db: Session, current_user_id: int) -> list[N
         logger.info(f"Articles returned for symbol {symbol}: {len(articles)}")
 
         if articles:
-            logger.info(
-                f"Sample article titles for {symbol}: {[a.title for a in articles[:3]]}"
-            )
+            logger.info(f"Sample article titles for {symbol}: {[a.title for a in articles[:3]]}")
 
         results.extend(articles)
 
