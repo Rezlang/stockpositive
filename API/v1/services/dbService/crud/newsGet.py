@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 from fastapi import HTTPException
 from typing import List, Optional
 from ORM.userFeedORM import UserFeedORM
@@ -41,29 +41,29 @@ def get_news_for_feed(feed_id: int, db: Session, current_user_id: int) -> List[N
     for symbol in symbols:
         logger.info(f"Querying news for symbol: {symbol}")
 
-        query = db.query(NewsArticleORM).filter(
+        statement = select(NewsArticleORM).where(
             NewsArticleORM.symbols.contains([symbol])
         )
 
-        pre_source_count = query.count()
+        # Count articles after symbol filter
+        pre_source_count = len(db.exec(statement).all())
         logger.info(
             f"Articles after symbol filter ({symbol}): {pre_source_count}")
 
         if normalized_sources:
-            query = query.filter(
+            statement = statement.where(
                 NewsArticleORM.sourcename.in_(normalized_sources)
             )
-            post_source_count = query.count()
+            post_source_count = len(db.exec(statement).all())
             logger.info(
                 f"Articles after source filter ({symbol}): {post_source_count}"
             )
 
-        articles = (
-            query
+        articles = db.exec(
+            statement
             .order_by(NewsArticleORM.pubdate.desc())
             .limit(10)
-            .all()
-        )
+        ).all()
 
         logger.info(
             f"Articles returned for symbol {symbol}: {len(articles)}"

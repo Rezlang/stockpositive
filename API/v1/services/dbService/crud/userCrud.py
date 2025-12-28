@@ -38,6 +38,8 @@ def get_user_by_id(session: Session, user_id: int) -> Optional[UserORM]:
 
 
 def create_user(session: Session, user: UserCreate) -> UserORM:
+    from ORM.userGroupORM import UserGroupORM
+
     # Check if email exists
     if get_user_by_email(session, user.email):
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -51,10 +53,19 @@ def create_user(session: Session, user: UserCreate) -> UserORM:
         raise HTTPException(
             status_code=400, detail="Phone number already registered")
 
+    # Get or create default user group (id=3 or create one)
+    default_group = session.get(UserGroupORM, 3)
+    if not default_group:
+        # Create default user group if it doesn't exist
+        default_group = UserGroupORM(name="default_users")
+        session.add(default_group)
+        session.commit()
+        session.refresh(default_group)
+
     # Create new user
     hashed_password = get_password_hash(user.password)
     db_user = UserORM(
-        usergroup_id=3,
+        usergroup_id=default_group.id,
         email=user.email,
         username=user.username,
         phone_number=user.phone_number,
