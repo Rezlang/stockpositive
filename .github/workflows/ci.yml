@@ -2,7 +2,7 @@ name: API v1 CI/CD
 
 on:
   push:
-    branches: [main]
+    # Run on all branches, not just main
     paths:
       - 'API/v1/**'
       - '.github/workflows/ci.yml'
