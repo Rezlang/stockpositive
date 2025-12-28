@@ -1,12 +1,16 @@
-from typing import TypeVar, Type, List, Optional, Callable
-from sqlalchemy.orm import Session
-from sqlalchemy import select
+from collections.abc import Callable
+from typing import TypeVar
+
 from fastapi import HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from ORM.ownedObjectMixin import OwnedObjectMixin
+
 from .baseRepository import BaseRepository
 
-T = TypeVar('T', bound=OwnedObjectMixin)
+
+T = TypeVar("T", bound=OwnedObjectMixin)
 
 
 class OwnedResourceRepository(BaseRepository[T]):
@@ -25,7 +29,7 @@ class OwnedResourceRepository(BaseRepository[T]):
         T: The ORM model type (must inherit from OwnedObjectMixin)
     """
 
-    def __init__(self, model: Type[T], session: Session, current_user_id: int):
+    def __init__(self, model: type[T], session: Session, current_user_id: int):
         """
         Initialize the owned resource repository.
 
@@ -37,7 +41,7 @@ class OwnedResourceRepository(BaseRepository[T]):
         super().__init__(model, session)
         self.current_user_id = current_user_id
 
-    def get_owned_by_id(self, id: int) -> Optional[T]:
+    def get_owned_by_id(self, id: int) -> T | None:
         """
         Get object by ID only if owned by current user.
 
@@ -74,19 +78,18 @@ class OwnedResourceRepository(BaseRepository[T]):
         obj = self.get_by_id(id)
         if not obj:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"{self.model.__name__} not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"{self.model.__name__} not found"
             )
 
         if not obj.is_owned_by(self.current_user_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Not authorized to access this {self.model.__name__}"
+                detail=f"Not authorized to access this {self.model.__name__}",
             )
 
         return obj
 
-    def get_all_owned(self, skip: int = 0, limit: int = 100) -> List[T]:
+    def get_all_owned(self, skip: int = 0, limit: int = 100) -> list[T]:
         """
         Get all objects owned by current user with pagination.
 

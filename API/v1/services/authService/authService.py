@@ -1,26 +1,27 @@
+import os
 from datetime import datetime, timedelta, timezone
-from typing import Optional, List
-from jose import JWTError, jwt
+from pathlib import Path
+
 import bcrypt
+from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
 from sqlmodel import Session, select
-from services.dbService.database import get_db
+
 from ORM.userORM import UserORM
-from dotenv import load_dotenv
-import os
-from pathlib import Path
+from services.dbService.database import get_db
+
 
 load_dotenv()
 
-env_path = Path('../') / '.env'
+env_path = Path("../") / ".env"
 load_dotenv(dotenv_path=env_path)
 
 SECRET_KEY = os.getenv("JWT_KEY")
 
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(
-    os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 if not SECRET_KEY:
     raise ValueError("SECRET_KEY must be set in environment variables")
@@ -30,17 +31,17 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="users/login")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against a hashed password"""
-    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
 
 def get_password_hash(password: str) -> str:
     """Hash a password using bcrypt"""
     salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed.decode('utf-8')
+    hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+    return hashed.decode("utf-8")
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
@@ -52,8 +53,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    session: Session = Depends(get_db)
+    token: str = Depends(oauth2_scheme), session: Session = Depends(get_db)
 ) -> UserORM:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -65,8 +65,8 @@ def get_current_user(
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
-    except JWTError:
-        raise credentials_exception
+    except JWTError as e:
+        raise credentials_exception from e
 
     statement = select(UserORM).where(UserORM.email == email)
     user = session.exec(statement).first()

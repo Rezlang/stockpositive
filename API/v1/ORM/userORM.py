@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+
 from .base import Base
 
 
@@ -18,8 +19,7 @@ class UserORM(Base):
 
     usergroup = relationship("UserGroupORM", backref="users")
 
-    feeds = relationship("UserFeedORM", back_populates="user",
-                         cascade="all, delete-orphan")
+    feeds = relationship("UserFeedORM", back_populates="user", cascade="all, delete-orphan")
 
     @property
     def permissions(self) -> dict[str, int | None]:
@@ -34,6 +34,5 @@ class UserORM(Base):
             return {}
 
         return {
-            link.permission.name: link.permission_value
-            for link in self.usergroup.permission_links
+            link.permission.name: link.permission_value for link in self.usergroup.permission_links
         }

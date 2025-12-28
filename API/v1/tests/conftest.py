@@ -1,30 +1,32 @@
-import pytest
-import sys
 import os
+import sys
+from collections.abc import Generator
 from pathlib import Path
+
+import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session
 from sqlalchemy import create_engine, event
-from typing import Generator
+from sqlmodel import Session
+
 
 # Add parent directory to path so we can import from the API package
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from main import app
-from services.dbService.database import get_db
-from services.authService.authService import create_access_token, get_password_hash
 from ORM.base import Base
-from ORM.userORM import UserORM
-from ORM.userGroupORM import UserGroupORM
-from ORM.permissionORM import PermissionORM
-from ORM.userGroupPermissionORM import UserGroupPermissionORM
-from ORM.userFeedORM import UserFeedORM
 from ORM.newsArticleORM import NewsArticleORM
+from ORM.permissionORM import PermissionORM
+from ORM.userFeedORM import UserFeedORM
+from ORM.userGroupORM import UserGroupORM
+from ORM.userGroupPermissionORM import UserGroupPermissionORM
+from ORM.userORM import UserORM
+from services.authService.authService import create_access_token, get_password_hash
+from services.dbService.database import get_db
+
 
 # Test database URL - uses a separate test database
 TEST_DATABASE_URL = os.getenv(
-    "TEST_DATABASE_URL",
-    "postgresql://postgres:postgres@localhost:5432/stockpositive_test"
+    "TEST_DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/stockpositive_test"
 )
 
 
@@ -54,6 +56,7 @@ def session_fixture(engine) -> Generator[Session, None, None]:
 @pytest.fixture(name="client")
 def client_fixture(session: Session) -> Generator[TestClient, None, None]:
     """Create a test client with database dependency override"""
+
     def get_session_override():
         return session
 
@@ -100,9 +103,7 @@ def test_user_fixture(session: Session) -> UserORM:
         # ADD.FEED gets a max value of 5, others get None (unlimited)
         perm_value = 5 if perm.name == "ADD.FEED" else None
         ugp = UserGroupPermissionORM(
-            usergroup_id=user_group.id,
-            permission_id=perm.id,
-            permission_value=perm_value
+            usergroup_id=user_group.id, permission_id=perm.id, permission_value=perm_value
         )
         session.add(ugp)
     session.commit()
@@ -112,7 +113,7 @@ def test_user_fixture(session: Session) -> UserORM:
         username="testuser",
         email="test@example.com",
         hashed_password=get_password_hash("testpassword123"),
-        usergroup_id=user_group.id
+        usergroup_id=user_group.id,
     )
     session.add(user)
     session.commit()
@@ -133,7 +134,15 @@ def admin_user_fixture(session: Session) -> UserORM:
     session.refresh(admin_group)
 
     # Get or create admin permissions
-    permission_names = ["LOAD.NEWS", "GET.NEWS", "GET.FEEDS", "ADMIN.GET.FEEDS", "ADD.FEED", "EDIT.FEED", "DELETE.FEED"]
+    permission_names = [
+        "LOAD.NEWS",
+        "GET.NEWS",
+        "GET.FEEDS",
+        "ADMIN.GET.FEEDS",
+        "ADD.FEED",
+        "EDIT.FEED",
+        "DELETE.FEED",
+    ]
     permissions = []
 
     for perm_name in permission_names:
@@ -156,9 +165,7 @@ def admin_user_fixture(session: Session) -> UserORM:
         # ADD.FEED gets a max value of 100, others get None (unlimited)
         perm_value = 100 if perm.name == "ADD.FEED" else None
         ugp = UserGroupPermissionORM(
-            usergroup_id=admin_group.id,
-            permission_id=perm.id,
-            permission_value=perm_value
+            usergroup_id=admin_group.id, permission_id=perm.id, permission_value=perm_value
         )
         session.add(ugp)
     session.commit()
@@ -168,7 +175,7 @@ def admin_user_fixture(session: Session) -> UserORM:
         username="adminuser",
         email="admin@example.com",
         hashed_password=get_password_hash("adminpassword123"),
-        usergroup_id=admin_group.id
+        usergroup_id=admin_group.id,
     )
     session.add(admin)
     session.commit()
@@ -198,7 +205,7 @@ def test_feed_fixture(session: Session, test_user: UserORM) -> UserFeedORM:
         feedname="Test Feed",
         stocks=["AAPL", "MSFT", "GOOGL"],
         sources=["market"],
-        user_id=test_user.id
+        user_id=test_user.id,
     )
     session.add(feed)
     session.commit()

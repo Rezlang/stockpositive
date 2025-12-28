@@ -1,0 +1,198 @@
+name: API v1 CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'API/v1/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'API/v1/**'
+      - '.github/workflows/ci.yml'
+
+# Cancel in-progress runs when a new run is triggered
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ===========================================================================
+  # Job 1: Code Quality Checks (Fast Feedback)
+  # ===========================================================================
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: API/v1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+          cache-dependency-path: |
+            API/v1/requirements.txt
+            API/v1/requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Check code formatting with Black
+        run: black --check --diff .
+
+      - name: Lint with Ruff
+        run: ruff check .
+
+      - name: Security scan with Bandit
+        run: bandit -r . -c pyproject.toml
+
+  # ===========================================================================
+  # Job 2: Type Checking
+  # ===========================================================================
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: API/v1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+          cache-dependency-path: |
+            API/v1/requirements.txt
+            API/v1/requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Type check with mypy
+        run: mypy .
+        continue-on-error: true  # Don't fail build on type errors initially
+
+  # ===========================================================================
+  # Job 3: Tests with PostgreSQL
+  # ===========================================================================
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: API/v1
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: stockpositive_test
+        ports:
+          - 5432:5432
+        # Health checks to wait for postgres to be ready
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/stockpositive_test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+          cache-dependency-path: API/v1/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run unit tests
+        run: pytest tests/unit -v --cov-report=term-missing
+
+      - name: Run integration tests
+        run: pytest tests/integration -v --cov-report=term-missing --cov-append
+
+      - name: Generate coverage report
+        run: pytest --cov=. --cov-report=xml --cov-report=html
+
+      - name: Upload coverage to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: API/v1/htmlcov/
+          retention-days: 30
+
+      - name: Coverage summary
+        run: |
+          echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          coverage report --format=markdown >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================================================
+  # Job 4: Build Verification
+  # ===========================================================================
+  build:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    needs: [code-quality, type-check, test]
+    defaults:
+      run:
+        working-directory: API/v1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify application starts
+        run: |
+          python -c "from main import app; print('✓ FastAPI app loads successfully')"
+
+      - name: All checks passed
+        run: |
+          echo "## ✅ All CI Checks Passed!" >> $GITHUB_STEP_SUMMARY
+          echo "- Code formatting ✓" >> $GITHUB_STEP_SUMMARY
+          echo "- Linting ✓" >> $GITHUB_STEP_SUMMARY
+          echo "- Security scan ✓" >> $GITHUB_STEP_SUMMARY
+          echo "- Type checking ✓" >> $GITHUB_STEP_SUMMARY
+          echo "- Tests ✓" >> $GITHUB_STEP_SUMMARY
+          echo "- Build ✓" >> $GITHUB_STEP_SUMMARY

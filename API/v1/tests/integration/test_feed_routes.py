@@ -1,9 +1,10 @@
 import pytest
-from fastapi.testclient import TestClient
 from fastapi import status
+from fastapi.testclient import TestClient
 from sqlmodel import Session
-from ORM.userORM import UserORM
+
 from ORM.userFeedORM import UserFeedORM
+from ORM.userORM import UserORM
 
 
 @pytest.mark.integration
@@ -15,7 +16,7 @@ class TestAddFeed:
         feed_data = {
             "feedname": "Tech Stocks",
             "stocks": ["AAPL", "GOOGL", "MSFT"],
-            "sources": ["market"]
+            "sources": ["market"],
         }
 
         response = client.post("/feeds/add_feed", json=feed_data, headers=auth_headers)
@@ -30,35 +31,26 @@ class TestAddFeed:
 
     def test_add_feed_without_auth(self, client: TestClient):
         """Test adding feed without authentication fails"""
-        feed_data = {
-            "feedname": "Tech Stocks",
-            "stocks": ["AAPL"],
-            "sources": ["market"]
-        }
+        feed_data = {"feedname": "Tech Stocks", "stocks": ["AAPL"], "sources": ["market"]}
 
         response = client.post("/feeds/add_feed", json=feed_data)
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_add_feed_exceeds_limit(self, client: TestClient, auth_headers: dict, session: Session, test_user: UserORM):
+    def test_add_feed_exceeds_limit(
+        self, client: TestClient, auth_headers: dict, session: Session, test_user: UserORM
+    ):
         """Test adding feed when user has reached their limit"""
         # Create feeds up to the limit (test_user has max 5 feeds)
         for i in range(5):
             feed = UserFeedORM(
-                feedname=f"Feed {i}",
-                stocks=["AAPL"],
-                sources=["market"],
-                user_id=test_user.id
+                feedname=f"Feed {i}", stocks=["AAPL"], sources=["market"], user_id=test_user.id
             )
             session.add(feed)
         session.commit()
 
         # Try to add one more
-        feed_data = {
-            "feedname": "Extra Feed",
-            "stocks": ["AAPL"],
-            "sources": ["market"]
-        }
+        feed_data = {"feedname": "Extra Feed", "stocks": ["AAPL"], "sources": ["market"]}
 
         response = client.post("/feeds/add_feed", json=feed_data, headers=auth_headers)
 
@@ -66,18 +58,14 @@ class TestAddFeed:
 
     def test_add_feed_invalid_data(self, client: TestClient, auth_headers: dict):
         """Test adding feed with invalid data"""
-        feed_data = {
-            "feedname": "",  # Empty name
-            "stocks": [],
-            "sources": []
-        }
+        feed_data = {"feedname": "", "stocks": [], "sources": []}  # Empty name
 
         response = client.post("/feeds/add_feed", json=feed_data, headers=auth_headers)
 
         # Could be 422 for validation error
         assert response.status_code in [
             status.HTTP_422_UNPROCESSABLE_CONTENT,
-            status.HTTP_400_BAD_REQUEST
+            status.HTTP_400_BAD_REQUEST,
         ]
 
     def test_add_feed_missing_fields(self, client: TestClient, auth_headers: dict):
@@ -116,7 +104,9 @@ class TestGetFeeds:
         data = response.json()
         assert isinstance(data, list)
 
-    def test_get_all_feeds_admin(self, client: TestClient, admin_auth_headers: dict, test_feed: UserFeedORM):
+    def test_get_all_feeds_admin(
+        self, client: TestClient, admin_auth_headers: dict, test_feed: UserFeedORM
+    ):
         """Test admin can get all feeds from all users"""
         response = client.get("/feeds/get_all_feeds", headers=admin_auth_headers)
 
@@ -135,15 +125,19 @@ class TestGetFeeds:
 class TestEditFeed:
     """Test feed editing endpoint"""
 
-    def test_edit_feed_success(self, client: TestClient, auth_headers: dict, test_feed: UserFeedORM):
+    def test_edit_feed_success(
+        self, client: TestClient, auth_headers: dict, test_feed: UserFeedORM
+    ):
         """Test successfully editing a feed"""
         update_data = {
             "feedname": "Updated Feed Name",
             "stocks": ["AAPL", "TSLA"],
-            "sources": ["market", "crypto"]
+            "sources": ["market", "crypto"],
         }
 
-        response = client.put(f"/feeds/edit_feed/{test_feed.id}", json=update_data, headers=auth_headers)
+        response = client.put(
+            f"/feeds/edit_feed/{test_feed.id}", json=update_data, headers=auth_headers
+        )
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -151,13 +145,15 @@ class TestEditFeed:
         assert data["stocks"] == update_data["stocks"]
         assert data["sources"] == update_data["sources"]
 
-    def test_edit_feed_partial_update(self, client: TestClient, auth_headers: dict, test_feed: UserFeedORM):
+    def test_edit_feed_partial_update(
+        self, client: TestClient, auth_headers: dict, test_feed: UserFeedORM
+    ):
         """Test partial update of a feed"""
-        update_data = {
-            "feedname": "New Name Only"
-        }
+        update_data = {"feedname": "New Name Only"}
 
-        response = client.put(f"/feeds/edit_feed/{test_feed.id}", json=update_data, headers=auth_headers)
+        response = client.put(
+            f"/feeds/edit_feed/{test_feed.id}", json=update_data, headers=auth_headers
+        )
 
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -168,9 +164,7 @@ class TestEditFeed:
 
     def test_edit_nonexistent_feed(self, client: TestClient, auth_headers: dict):
         """Test editing a feed that doesn't exist"""
-        update_data = {
-            "feedname": "New Name"
-        }
+        update_data = {"feedname": "New Name"}
 
         response = client.put("/feeds/edit_feed/99999", json=update_data, headers=auth_headers)
 
@@ -178,32 +172,29 @@ class TestEditFeed:
 
     def test_edit_feed_without_auth(self, client: TestClient, test_feed: UserFeedORM):
         """Test editing feed without authentication fails"""
-        update_data = {
-            "feedname": "New Name"
-        }
+        update_data = {"feedname": "New Name"}
 
         response = client.put(f"/feeds/edit_feed/{test_feed.id}", json=update_data)
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_edit_other_user_feed(self, client: TestClient, auth_headers: dict, session: Session, admin_user: UserORM):
+    def test_edit_other_user_feed(
+        self, client: TestClient, auth_headers: dict, session: Session, admin_user: UserORM
+    ):
         """Test user cannot edit another user's feed"""
         # Create a feed owned by admin
         admin_feed = UserFeedORM(
-            feedname="Admin Feed",
-            stocks=["AAPL"],
-            sources=["market"],
-            user_id=admin_user.id
+            feedname="Admin Feed", stocks=["AAPL"], sources=["market"], user_id=admin_user.id
         )
         session.add(admin_feed)
         session.commit()
         session.refresh(admin_feed)
 
-        update_data = {
-            "feedname": "Hacked Name"
-        }
+        update_data = {"feedname": "Hacked Name"}
 
-        response = client.put(f"/feeds/edit_feed/{admin_feed.id}", json=update_data, headers=auth_headers)
+        response = client.put(
+            f"/feeds/edit_feed/{admin_feed.id}", json=update_data, headers=auth_headers
+        )
 
         # Should be forbidden or not found
         assert response.status_code in [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND]
@@ -213,7 +204,9 @@ class TestEditFeed:
 class TestDeleteFeed:
     """Test feed deletion endpoint"""
 
-    def test_delete_feed_success(self, client: TestClient, auth_headers: dict, test_feed: UserFeedORM):
+    def test_delete_feed_success(
+        self, client: TestClient, auth_headers: dict, test_feed: UserFeedORM
+    ):
         """Test successfully deleting a feed"""
         response = client.delete(f"/feeds/delete_feed/{test_feed.id}", headers=auth_headers)
 
@@ -236,14 +229,13 @@ class TestDeleteFeed:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_delete_other_user_feed(self, client: TestClient, auth_headers: dict, session: Session, admin_user: UserORM):
+    def test_delete_other_user_feed(
+        self, client: TestClient, auth_headers: dict, session: Session, admin_user: UserORM
+    ):
         """Test user cannot delete another user's feed"""
         # Create a feed owned by admin
         admin_feed = UserFeedORM(
-            feedname="Admin Feed",
-            stocks=["AAPL"],
-            sources=["market"],
-            user_id=admin_user.id
+            feedname="Admin Feed", stocks=["AAPL"], sources=["market"], user_id=admin_user.id
         )
         session.add(admin_feed)
         session.commit()

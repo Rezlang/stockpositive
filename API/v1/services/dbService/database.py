@@ -1,8 +1,10 @@
-from sqlmodel import Session, create_engine, text
-from typing import Generator
 import os
-from dotenv import load_dotenv
+from collections.abc import Generator
 from pathlib import Path
+
+from dotenv import load_dotenv
+from sqlmodel import Session, create_engine, text
+
 
 # Load environment variables
 env_path = Path("/Users/joshmoskoff/Desktop/stockpositive/API/.env")

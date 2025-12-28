@@ -1,9 +1,11 @@
-from typing import Generic, TypeVar, Type, Optional, List
-from sqlalchemy.orm import Session
-from sqlalchemy import select
-from fastapi import HTTPException, status
+from typing import Generic, TypeVar
 
-T = TypeVar('T')
+from fastapi import HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+
+T = TypeVar("T")
 
 
 class BaseRepository(Generic[T]):
@@ -20,7 +22,7 @@ class BaseRepository(Generic[T]):
         T: The ORM model type this repository manages
     """
 
-    def __init__(self, model: Type[T], session: Session):
+    def __init__(self, model: type[T], session: Session):
         """
         Initialize the repository.
 
@@ -31,7 +33,7 @@ class BaseRepository(Generic[T]):
         self.model = model
         self.session = session
 
-    def get_by_id(self, id: int) -> Optional[T]:
+    def get_by_id(self, id: int) -> T | None:
         """
         Get a single object by ID.
 
@@ -59,12 +61,11 @@ class BaseRepository(Generic[T]):
         obj = self.get_by_id(id)
         if not obj:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"{self.model.__name__} not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"{self.model.__name__} not found"
             )
         return obj
 
-    def get_all(self, skip: int = 0, limit: int = 100) -> List[T]:
+    def get_all(self, skip: int = 0, limit: int = 100) -> list[T]:
         """
         Get all objects with pagination.
 

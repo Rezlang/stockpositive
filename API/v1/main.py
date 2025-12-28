@@ -1,7 +1,7 @@
-from routes import newsRoutes
-from routes import userRoutes
-from routes import feedRoutes
 from fastapi import FastAPI
+
+from routes import feedRoutes, newsRoutes, userRoutes
+
 
 app = FastAPI()
 

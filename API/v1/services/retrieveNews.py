@@ -1,32 +1,32 @@
-from fastapi import HTTPException, Query
-from typing import List, Optional
-from dotenv import load_dotenv
-from pathlib import Path
-from datetime import datetime
 import os
-import requests
 import re
-from ORM.newsArticleORM import NewsArticleORM
-from models.newsResponse import NewsResponse
-from models.newsArticle import NewsArticle
+from datetime import datetime
+from pathlib import Path
 
-env_path = Path('../') / '.env'
+import requests
+from dotenv import load_dotenv
+from fastapi import HTTPException, Query
+
+from ORM.newsArticleORM import NewsArticleORM
+
+
+env_path = Path("../") / ".env"
 load_dotenv(dotenv_path=env_path)
 
 NEWS_API_KEY = os.getenv("NEWSDATA_API_KEY")
 NEWS_API_URL = "https://newsdata.io/api/1/market"
 
 
-def normalize_source_name(source_name: str) -> Optional[str]:
+def normalize_source_name(source_name: str) -> str | None:
     """Remove special characters and convert to uppercase"""
     if not source_name:
         return None
-    return re.sub(r'[^a-zA-Z0-9]', '', source_name.upper().strip())
+    return re.sub(r"[^a-zA-Z0-9]", "", source_name.upper().strip())
 
 
 def retrieve_news(
     source: str = "market",
-    symbols: Optional[List[str]] = Query(default=None),
+    symbols: list[str] | None = Query(default=None),
 ):
     params = {
         "apikey": NEWS_API_KEY,
@@ -41,17 +41,16 @@ def retrieve_news(
         response = requests.get(NEWS_API_URL, params=params, timeout=10)
         response.raise_for_status()
     except requests.RequestException as exc:
-        raise HTTPException(status_code=502, detail=str(exc))
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     data = response.json()
 
-    articles: List[NewsArticleORM] = []
+    articles: list[NewsArticleORM] = []
     for item in data.get("results", []):
         pubdate = item.get("pubDate")
         if pubdate and isinstance(pubdate, str):
             try:
-                pubdate = datetime.fromisoformat(
-                    pubdate.replace('Z', '+00:00'))
+                pubdate = datetime.fromisoformat(pubdate.replace("Z", "+00:00"))
             except (ValueError, AttributeError):
                 pubdate = None
 
@@ -59,8 +58,7 @@ def retrieve_news(
         if keywords and not isinstance(keywords, list):
             keywords = [keywords.upper()] if keywords else None
         elif keywords:
-            keywords = [k.upper() if isinstance(
-                k, str) else k for k in keywords]
+            keywords = [k.upper() if isinstance(k, str) else k for k in keywords]
 
         creator = item.get("creator")
         if creator and not isinstance(creator, list):
@@ -84,8 +82,7 @@ def retrieve_news(
             creator=creator,
             symbols=symbol,
             pubdate=pubdate,
-            sourcename=normalize_source_name(
-                item.get("source_name")),
+            sourcename=normalize_source_name(item.get("source_name")),
             sentiment=item.get("sentiment"),
             aisummary=item.get("ai_summary"),
         )

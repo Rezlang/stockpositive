@@ -1,7 +1,8 @@
 import pytest
-from fastapi.testclient import TestClient
 from fastapi import status
+from fastapi.testclient import TestClient
 from sqlmodel import Session
+
 from ORM.userORM import UserORM
 
 
@@ -15,7 +16,7 @@ class TestUserRegistration:
             "username": "newuser",
             "email": "newuser@example.com",
             "phone_number": "+1234567890",
-            "password": "SecurePassword123!"
+            "password": "SecurePassword123!",
         }
 
         response = client.post("/users/register", json=user_data)
@@ -33,7 +34,7 @@ class TestUserRegistration:
             "username": "anotheruser",
             "email": test_user.email,
             "phone_number": "+9876543210",
-            "password": "AnotherPassword123!"
+            "password": "AnotherPassword123!",
         }
 
         response = client.post("/users/register", json=user_data)
@@ -46,7 +47,7 @@ class TestUserRegistration:
             "username": "testuser123",
             "email": "notanemail",
             "phone_number": "+1234567890",
-            "password": "SecurePassword123!"
+            "password": "SecurePassword123!",
         }
 
         response = client.post("/users/register", json=user_data)
@@ -59,7 +60,7 @@ class TestUserRegistration:
             "username": "weakuser",
             "email": "newuser@example.com",
             "phone_number": "+1234567890",
-            "password": "123"
+            "password": "123",
         }
 
         response = client.post("/users/register", json=user_data)
@@ -67,7 +68,7 @@ class TestUserRegistration:
         # Depending on password validation rules, this might be 422 or 400
         assert response.status_code in [
             status.HTTP_422_UNPROCESSABLE_CONTENT,
-            status.HTTP_400_BAD_REQUEST
+            status.HTTP_400_BAD_REQUEST,
         ]
 
     def test_register_missing_fields(self, client: TestClient):
@@ -85,7 +86,7 @@ class TestUserLogin:
         """Test successful login"""
         login_data = {
             "username": test_user.email,  # OAuth2 uses 'username' field
-            "password": "testpassword123"
+            "password": "testpassword123",
         }
 
         response = client.post("/users/login", data=login_data)
@@ -99,10 +100,7 @@ class TestUserLogin:
 
     def test_login_wrong_password(self, client: TestClient, test_user: UserORM):
         """Test login with incorrect password"""
-        login_data = {
-            "username": test_user.email,
-            "password": "wrongpassword"
-        }
+        login_data = {"username": test_user.email, "password": "wrongpassword"}
 
         response = client.post("/users/login", data=login_data)
 
@@ -111,10 +109,7 @@ class TestUserLogin:
 
     def test_login_nonexistent_user(self, client: TestClient):
         """Test login with non-existent user"""
-        login_data = {
-            "username": "nonexistent@example.com",
-            "password": "somepassword"
-        }
+        login_data = {"username": "nonexistent@example.com", "password": "somepassword"}
 
         response = client.post("/users/login", data=login_data)
 
@@ -128,10 +123,7 @@ class TestUserLogin:
 
     def test_login_empty_password(self, client: TestClient, test_user: UserORM):
         """Test login with empty password"""
-        login_data = {
-            "username": test_user.email,
-            "password": ""
-        }
+        login_data = {"username": test_user.email, "password": ""}
 
         response = client.post("/users/login", data=login_data)
 
@@ -142,7 +134,9 @@ class TestUserLogin:
 class TestUserProfile:
     """Test user profile endpoint"""
 
-    def test_get_current_user_profile(self, client: TestClient, auth_headers: dict, test_user: UserORM):
+    def test_get_current_user_profile(
+        self, client: TestClient, auth_headers: dict, test_user: UserORM
+    ):
         """Test retrieving current user profile with valid token"""
         response = client.get("/users/me", headers=auth_headers)
 
@@ -172,7 +166,9 @@ class TestUserProfile:
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_get_profile_admin_user(self, client: TestClient, admin_auth_headers: dict, admin_user: UserORM):
+    def test_get_profile_admin_user(
+        self, client: TestClient, admin_auth_headers: dict, admin_user: UserORM
+    ):
         """Test retrieving admin user profile"""
         response = client.get("/users/me", headers=admin_auth_headers)
 

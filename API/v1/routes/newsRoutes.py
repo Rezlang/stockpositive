@@ -1,47 +1,48 @@
-from fastapi import APIRouter, Query
-from typing import List, Optional, Dict
+
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from models.newsResponse import NewsResponse
+
 from models.newsArticle import NewsArticle
 from ORM.newsArticleORM import NewsArticleORM
 from ORM.userORM import UserORM
-from services.retrieveNews import retrieve_news
-from services.dbService.crud.newsInsert import create_news_article
-from services.dbService.crud.newsGet import get_news_for_feed
-from services.dbService.database import get_db
-from fastapi import Depends
-from services.authService.permissionCheckers import require_permissions
 from services.authService.authService import get_current_active_user
+from services.authService.permissionCheckers import require_permissions
+from services.dbService.crud.newsGet import get_news_for_feed
+from services.dbService.crud.newsInsert import create_news_article
+from services.dbService.database import get_db
+from services.retrieveNews import retrieve_news
+
 
 router = APIRouter()
 
 
-@router.get("/load-news",
-            response_model=List[NewsArticle],
-            dependencies=[require_permissions(["LOAD.NEWS"])])
+@router.get(
+    "/load-news",
+    response_model=list[NewsArticle],
+    dependencies=[require_permissions(["LOAD.NEWS"])],
+)
 def load_market_news(
     source: str = "market",
-    symbols: Optional[List[str]] = Query(default=None),
-    db: Session = Depends(get_db)
+    symbols: list[str] | None = Query(default=None),
+    db: Session = Depends(get_db),
 ):
-    articles: List[NewsArticleORM] = retrieve_news(source, symbols)
+    articles: list[NewsArticleORM] = retrieve_news(source, symbols)
 
     for article in articles:
         create_news_article(article, db)
 
-    articles = [NewsArticle.model_validate(
-        a, from_attributes=True) for a in articles]
+    articles = [NewsArticle.model_validate(a, from_attributes=True) for a in articles]
 
     return articles
 
 
-@router.get("/get-news",
-            response_model=List[NewsArticle],
-            dependencies=[require_permissions(["GET.NEWS"])])
+@router.get(
+    "/get-news", response_model=list[NewsArticle], dependencies=[require_permissions(["GET.NEWS"])]
+)
 def get_market_news(
     feedId: int,
     db: Session = Depends(get_db),
-    current_user: UserORM = Depends(get_current_active_user)
+    current_user: UserORM = Depends(get_current_active_user),
 ):
     news = get_news_for_feed(feedId, db, current_user.id)
 

@@ -23,21 +23,24 @@ Example Usage:
         return None
 """
 
-from typing import Type, TypeVar
+from typing import TypeVar
+
 from fastapi import Depends
 from sqlalchemy.orm import Session
 
-from services.dbService.database import get_db
-from services.authService.authService import get_current_active_user
-from ORM.userORM import UserORM
 from ORM.ownedObjectMixin import OwnedObjectMixin
+from ORM.userORM import UserORM
+from services.authService.authService import get_current_active_user
+from services.dbService.database import get_db
+
 from .baseRepository import BaseRepository
 from .ownedResourceRepository import OwnedResourceRepository
 
-T = TypeVar('T', bound=OwnedObjectMixin)
+
+T = TypeVar("T", bound=OwnedObjectMixin)
 
 
-def get_owned_repository(model: Type[T]):
+def get_owned_repository(model: type[T]):
     """
     Factory function that returns a FastAPI dependency for owned resource repositories.
 
@@ -61,22 +64,19 @@ def get_owned_repository(model: Type[T]):
             feed = repo.get_owned_by_id_or_404(feed_id)
             return feed
     """
+
     def _get_repository(
-        session: Session = Depends(get_db),
-        current_user: UserORM = Depends(get_current_active_user)
+        session: Session = Depends(get_db), current_user: UserORM = Depends(get_current_active_user)
     ) -> OwnedResourceRepository[T]:
         return OwnedResourceRepository(
-            model=model,
-            session=session,
-            current_user_id=current_user.id
+            model=model, session=session, current_user_id=current_user.id
         )
 
     return _get_repository
 
 
 def get_feed_repository(
-    session: Session = Depends(get_db),
-    current_user: UserORM = Depends(get_current_active_user)
+    session: Session = Depends(get_db), current_user: UserORM = Depends(get_current_active_user)
 ) -> OwnedResourceRepository:
     """
     Pre-configured FastAPI dependency for UserFeed repository.
@@ -101,16 +101,15 @@ def get_feed_repository(
             return repo.get_all_owned()
     """
     from ORM.userFeedORM import UserFeedORM
+
     return OwnedResourceRepository(
-        model=UserFeedORM,
-        session=session,
-        current_user_id=current_user.id
+        model=UserFeedORM, session=session, current_user_id=current_user.id
     )
 
 
 __all__ = [
-    'BaseRepository',
-    'OwnedResourceRepository',
-    'get_owned_repository',
-    'get_feed_repository',
+    "BaseRepository",
+    "OwnedResourceRepository",
+    "get_owned_repository",
+    "get_feed_repository",
 ]

@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime, ARRAY
-from sqlalchemy.sql import func
+from sqlalchemy import ARRAY, Column, DateTime, Integer, String
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+
 from .base import Base
 from .ownedObjectMixin import OwnedObjectMixin
 
@@ -15,5 +16,4 @@ class UserFeedORM(Base, OwnedObjectMixin):
     feedname = Column(String(100), nullable=False)
     stocks = Column(ARRAY(String), nullable=False)
     sources = Column(ARRAY(String), nullable=False)
-    created_at = Column(DateTime(timezone=True),
-                        server_default=func.now(), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)

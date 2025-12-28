@@ -1,23 +1,26 @@
 """
 Test utility functions and helpers
 """
-from typing import Dict, List, Optional
+
+from typing import Optional
+
 from sqlmodel import Session
-from ORM.userORM import UserORM
-from ORM.userGroupORM import UserGroupORM
-from ORM.permissionORM import PermissionORM
-from ORM.userGroupPermissionORM import UserGroupPermissionORM
-from ORM.userFeedORM import UserFeedORM
+
 from ORM.newsArticleORM import NewsArticleORM
-from services.authService.authService import get_password_hash, create_access_token
+from ORM.permissionORM import PermissionORM
+from ORM.userFeedORM import UserFeedORM
+from ORM.userGroupORM import UserGroupORM
+from ORM.userGroupPermissionORM import UserGroupPermissionORM
+from ORM.userORM import UserORM
+from services.authService.authService import create_access_token, get_password_hash
 
 
 def create_user_with_permissions(
     session: Session,
     email: str,
     password: str,
-    permissions: List[Dict[str, any]],
-    group_name: Optional[str] = None
+    permissions: list[dict[str, any]],
+    group_name: str | None = None,
 ) -> UserORM:
     """
     Create a user with specific permissions.
@@ -54,34 +57,28 @@ def create_user_with_permissions(
 
     # Create permissions
     for perm_data in permissions:
-        perm = PermissionORM(
-            name=perm_data["name"]
-        )
+        perm = PermissionORM(name=perm_data["name"])
         session.add(perm)
     session.commit()
 
     # Link permissions to user group
     for perm_data in permissions:
-        perm = session.query(PermissionORM).filter(
-            PermissionORM.name == perm_data["name"]
-        ).first()
+        perm = session.query(PermissionORM).filter(PermissionORM.name == perm_data["name"]).first()
         if perm:
             perm_value = perm_data.get("max_value")
             ugp = UserGroupPermissionORM(
-                usergroup_id=user_group.id,
-                permission_id=perm.id,
-                permission_value=perm_value
+                usergroup_id=user_group.id, permission_id=perm.id, permission_value=perm_value
             )
             session.add(ugp)
     session.commit()
 
     # Create user
-    username = email.split('@')[0]  # Generate username from email
+    username = email.split("@")[0]  # Generate username from email
     user = UserORM(
         username=username,
         email=email,
         hashed_password=get_password_hash(password),
-        usergroup_id=user_group.id
+        usergroup_id=user_group.id,
     )
     session.add(user)
     session.commit()
@@ -94,8 +91,8 @@ def create_test_feed(
     session: Session,
     owner: UserORM,
     feedname: str = "Test Feed",
-    stocks: Optional[List[str]] = None,
-    sources: Optional[List[str]] = None
+    stocks: list[str] | None = None,
+    sources: list[str] | None = None,
 ) -> UserFeedORM:
     """
     Create a test feed for a user.
@@ -115,12 +112,7 @@ def create_test_feed(
     if sources is None:
         sources = ["market"]
 
-    feed = UserFeedORM(
-        feedname=feedname,
-        stocks=stocks,
-        sources=sources,
-        user_id=owner.id
-    )
+    feed = UserFeedORM(feedname=feedname, stocks=stocks, sources=sources, user_id=owner.id)
     session.add(feed)
     session.commit()
     session.refresh(feed)
@@ -132,9 +124,9 @@ def create_test_news_article(
     session: Session,
     symbol: str = "AAPL",
     title: str = "Test Article",
-    link: Optional[str] = None,
+    link: str | None = None,
     pubdate: str = "2024-01-01 12:00:00",
-    sourcename: str = "TestSource"
+    sourcename: str = "TestSource",
 ) -> NewsArticleORM:
     """
     Create a test news article.
@@ -154,11 +146,7 @@ def create_test_news_article(
         link = f"https://example.com/{symbol.lower()}"
 
     article = NewsArticleORM(
-        symbol=symbol,
-        title=title,
-        link=link,
-        pubdate=pubdate,
-        sourcename=sourcename
+        symbol=symbol, title=title, link=link, pubdate=pubdate, sourcename=sourcename
     )
     session.add(article)
     session.commit()
@@ -167,7 +155,7 @@ def create_test_news_article(
     return article
 
 
-def get_auth_headers(user: UserORM) -> Dict[str, str]:
+def get_auth_headers(user: UserORM) -> dict[str, str]:
     """
     Generate authentication headers for a user.
 
@@ -181,7 +169,7 @@ def get_auth_headers(user: UserORM) -> Dict[str, str]:
     return {"Authorization": f"Bearer {access_token}"}
 
 
-def assert_valid_response_structure(response_data: dict, expected_fields: List[str]):
+def assert_valid_response_structure(response_data: dict, expected_fields: list[str]):
     """
     Assert that a response contains expected fields.
 
@@ -194,11 +182,8 @@ def assert_valid_response_structure(response_data: dict, expected_fields: List[s
 
 
 def create_multiple_feeds(
-    session: Session,
-    owner: UserORM,
-    count: int,
-    base_name: str = "Feed"
-) -> List[UserFeedORM]:
+    session: Session, owner: UserORM, count: int, base_name: str = "Feed"
+) -> list[UserFeedORM]:
     """
     Create multiple test feeds for a user.
 
@@ -218,7 +203,7 @@ def create_multiple_feeds(
             owner,
             feedname=f"{base_name} {i + 1}",
             stocks=[f"STOCK{i}"],
-            sources=["market"]
+            sources=["market"],
         )
         feeds.append(feed)
 
@@ -226,10 +211,8 @@ def create_multiple_feeds(
 
 
 def create_multiple_news_articles(
-    session: Session,
-    symbols: List[str],
-    count_per_symbol: int = 1
-) -> List[NewsArticleORM]:
+    session: Session, symbols: list[str], count_per_symbol: int = 1
+) -> list[NewsArticleORM]:
     """
     Create multiple news articles for different symbols.
 
@@ -248,7 +231,7 @@ def create_multiple_news_articles(
                 session,
                 symbol=symbol,
                 title=f"{symbol} News {i + 1}",
-                pubdate=f"2024-01-{(i + 1):02d} 12:00:00"
+                pubdate=f"2024-01-{(i + 1):02d} 12:00:00",
             )
             articles.append(article)
 

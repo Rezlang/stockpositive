@@ -1,9 +1,10 @@
-from models.newsArticle import NewsArticle
-from typing import List
+
 from pydantic import BaseModel
+
+from models.newsArticle import NewsArticle
 
 
 class NewsResponse(BaseModel):
     status: str
     total_results: int
-    results: List[NewsArticle]
+    results: list[NewsArticle]

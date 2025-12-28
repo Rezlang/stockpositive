@@ -1,11 +1,10 @@
-import pytest
 from unittest.mock import Mock
+
+import pytest
 from fastapi import HTTPException
-from services.authService.permissionCheckers import (
-    require_permissions,
-    require_permission_with_max
-)
+
 from ORM.userORM import UserORM
+from services.authService.permissionCheckers import require_permission_with_max, require_permissions
 
 
 @pytest.mark.unit
@@ -30,11 +29,7 @@ class TestRequirePermissions:
     def test_require_permissions_with_multiple_valid_permissions(self):
         """Test that user with multiple valid permissions passes check"""
         mock_user = Mock(spec=UserORM)
-        mock_user.permissions = {
-            "GET.NEWS": -1,
-            "WRITE.NEWS": -1,
-            "DELETE.NEWS": -1
-        }
+        mock_user.permissions = {"GET.NEWS": -1, "WRITE.NEWS": -1, "DELETE.NEWS": -1}
 
         checker_dependency = require_permissions(["GET.NEWS", "WRITE.NEWS"])
         checker_func = checker_dependency.dependency
@@ -131,8 +126,7 @@ class TestRequirePermissionWithMax:
 
         # User can add feed if they have less than 5 total
         checker_dependency = require_permission_with_max(
-            "ADD.FEED",
-            value_getter=lambda u: len(u.feeds) + 1
+            "ADD.FEED", value_getter=lambda u: len(u.feeds) + 1
         )
         checker_func = checker_dependency.dependency
 
@@ -146,8 +140,7 @@ class TestRequirePermissionWithMax:
         mock_user.feeds = [1, 2, 3]  # User has 3 feeds, limit is 3
 
         checker_dependency = require_permission_with_max(
-            "ADD.FEED",
-            value_getter=lambda u: len(u.feeds) + 1
+            "ADD.FEED", value_getter=lambda u: len(u.feeds) + 1
         )
         checker_func = checker_dependency.dependency
 
@@ -163,8 +156,7 @@ class TestRequirePermissionWithMax:
         mock_user.feeds = [1, 2, 3, 4, 5]  # Many feeds
 
         checker_dependency = require_permission_with_max(
-            "ADD.FEED",
-            value_getter=lambda u: len(u.feeds) + 1
+            "ADD.FEED", value_getter=lambda u: len(u.feeds) + 1
         )
         checker_func = checker_dependency.dependency
 

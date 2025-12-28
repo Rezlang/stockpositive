@@ -1,9 +1,11 @@
-from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import declared_attr, relationship
 from typing import TYPE_CHECKING
 
+from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy.orm import declared_attr, relationship
+
+
 if TYPE_CHECKING:
-    from .userORM import UserORM
+    pass
 
 
 class OwnedObjectMixin:
@@ -26,12 +28,7 @@ class OwnedObjectMixin:
     @declared_attr
     def user_id(cls):
         """Foreign key to the users table with index for query performance"""
-        return Column(
-            Integer,
-            ForeignKey("users.id"),
-            nullable=False,
-            index=True
-        )
+        return Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
 
     @declared_attr
     def user(cls):

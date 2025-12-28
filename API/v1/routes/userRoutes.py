@@ -1,20 +1,21 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
-from datetime import timedelta
-from typing import List
 
 from models.token import Token
 from models.user import UserCreate, UserResponse
-from services.dbService.database import get_db
-from services.dbService.crud.userCrud import create_user, get_user_by_email
+from ORM.userORM import UserORM
 from services.authService.authService import (
-    verify_password,
+    ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
     get_current_active_user,
-    ACCESS_TOKEN_EXPIRE_MINUTES
+    verify_password,
 )
-from ORM.userORM import UserORM
+from services.dbService.crud.userCrud import create_user, get_user_by_email
+from services.dbService.database import get_db
+
 
 router = APIRouter()
 
@@ -26,13 +27,9 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=Token)
-def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
-):
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """Login and receive access token"""
-    user = get_user_by_email(
-        db, form_data.username)  # OAuth2 uses 'username' field
+    user = get_user_by_email(db, form_data.username)  # OAuth2 uses 'username' field
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -41,9 +38,7 @@ def login(
         )
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
-    )
+    access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
 
 

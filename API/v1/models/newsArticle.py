@@ -1,24 +1,21 @@
-from pydantic import BaseModel
 from datetime import datetime
-from typing import List, Optional
-from ORM.newsArticleORM import NewsArticleORM
+
+from pydantic import BaseModel
 
 
 class NewsArticle(BaseModel):
-    id: Optional[int]
-    title: Optional[str]
-    description: Optional[str]
-    content: Optional[str]
-    link: Optional[str]
-    imagelink: Optional[str]
-    keywords: Optional[List[str]]
-    creator: Optional[List[str]]
-    symbols: Optional[List[str]]
-    pubdate: Optional[datetime]
-    sourcename: Optional[str]
-    sentiment: Optional[str]
-    aisummary: Optional[str]
+    id: int | None
+    title: str | None
+    description: str | None
+    content: str | None
+    link: str | None
+    imagelink: str | None
+    keywords: list[str] | None
+    creator: list[str] | None
+    symbols: list[str] | None
+    pubdate: datetime | None
+    sourcename: str | None
+    sentiment: str | None
+    aisummary: str | None
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}

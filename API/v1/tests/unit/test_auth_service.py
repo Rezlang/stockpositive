@@ -1,12 +1,14 @@
-import pytest
 from datetime import timedelta
+
+import pytest
 from jose import jwt
+
 from services.authService.authService import (
-    verify_password,
-    get_password_hash,
-    create_access_token,
+    ALGORITHM,
     SECRET_KEY,
-    ALGORITHM
+    create_access_token,
+    get_password_hash,
+    verify_password,
 )
 
 
@@ -80,11 +82,7 @@ class TestAccessToken:
 
     def test_create_access_token_with_additional_claims(self):
         """Test token creation with additional claims"""
-        data = {
-            "sub": "test@example.com",
-            "role": "admin",
-            "permissions": ["read", "write"]
-        }
+        data = {"sub": "test@example.com", "role": "admin", "permissions": ["read", "write"]}
         token = create_access_token(data)
 
         decoded = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -95,6 +93,7 @@ class TestAccessToken:
     def test_token_different_for_same_data(self):
         """Test that creating token twice with same data produces different tokens (due to timestamp)"""
         import time
+
         data = {"sub": "test@example.com"}
 
         token1 = create_access_token(data)

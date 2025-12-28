@@ -34,6 +34,16 @@ venv/
 # Coverage reports
 htmlcov/
 .coverage
+coverage.xml
+.pytest_cache/
+
+# Ruff cache
+.ruff_cache/
+
+# mypy cache
+.mypy_cache/
+.dmypy.json
+dmypy.json
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/

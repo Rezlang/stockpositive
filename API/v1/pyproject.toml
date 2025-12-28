@@ -1,0 +1,216 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stockpositive-api-v1"
+version = "1.0.0"
+description = "StockPositive API v1 - FastAPI backend for stock news feeds"
+requires-python = ">=3.10"
+
+# =============================================================================
+# Black - Code Formatter
+# =============================================================================
+[tool.black]
+line-length = 100
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # Directories
+  \.eggs
+  | \.git
+  | \.venv
+  | venv
+  | __pycache__
+  | build
+  | dist
+  | alembic/versions
+)/
+'''
+
+# =============================================================================
+# Ruff - Fast Python Linter (replaces flake8 + isort + others)
+# =============================================================================
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+# Directories to exclude from linting
+exclude = [
+    ".git",
+    ".venv",
+    "venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+]
+
+[tool.ruff.lint]
+# Enable specific rule sets
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort (import sorting)
+    "N",      # pep8-naming
+    "UP",     # pyupgrade
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "DTZ",    # flake8-datetimez
+    "T10",    # flake8-debugger
+    "ISC",    # flake8-implicit-str-concat
+    "ICN",    # flake8-import-conventions
+    "PIE",    # flake8-pie
+    "PT",     # flake8-pytest-style
+    "Q",      # flake8-quotes
+    "RSE",    # flake8-raise
+    "RET",    # flake8-return
+    "SIM",    # flake8-simplify
+    "PTH",    # flake8-use-pathlib
+    "ERA",    # eradicate (commented-out code)
+]
+
+# Rules to ignore
+ignore = [
+    "E501",   # Line too long (handled by Black)
+    "N802",   # Function name should be lowercase (conflicts with camelCase convention)
+    "N803",   # Argument name should be lowercase (conflicts with camelCase convention)
+    "N805",   # First argument should be named 'self' (SQLAlchemy @declared_attr uses 'cls')
+    "N806",   # Variable in function should be lowercase (conflicts with camelCase convention)
+    "N815",   # Variable in class scope should not be mixedCase (conflicts with project style)
+    "N816",   # Variable in global scope should not be mixedCase
+    "N999",   # Invalid module name (project uses camelCase file names)
+    "B008",   # Do not perform function calls in argument defaults (FastAPI Depends pattern)
+    "DTZ005", # timezone-naive datetime (project uses naive datetimes)
+    "PTH123", # Use pathlib.Path.open() - not critical for this project
+    "RET504", # Unnecessary variable assignment before return statement
+    "SIM108", # Use ternary operator instead of if-else-block
+    "ERA001", # Found commented-out code (allow documentation comments)
+    "PT003",  # scope='function' is implied in pytest fixtures
+]
+
+# Allow unused variables when prefixed with underscore
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can have longer lines, assertions, and unused imports
+"tests/**/*.py" = ["E501", "PT011", "F401"]
+# __init__.py files can have unused imports
+"__init__.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+# Import sorting configuration
+known-first-party = ["ORM", "models", "routes", "services"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+lines-after-imports = 2
+
+[tool.ruff.lint.flake8-pytest-style]
+# Pytest style configuration
+fixture-parentheses = false
+mark-parentheses = false
+
+# =============================================================================
+# mypy - Type Checking
+# =============================================================================
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false  # Start lenient, can tighten later
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+no_implicit_optional = true
+show_error_codes = true
+show_column_numbers = true
+
+# Ignore missing imports for third-party libraries without type stubs
+[[tool.mypy.overrides]]
+module = [
+    "chromadb.*",
+    "duckdb.*",
+    "mistralai.*",
+    "twelvedata.*",
+    "yfinance.*",
+    "passlib.*",
+    "jose.*",
+]
+ignore_missing_imports = true
+
+# Less strict for tests
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+check_untyped_defs = false
+
+# =============================================================================
+# bandit - Security Linter
+# =============================================================================
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "venv"]
+skips = [
+    "B101",  # assert_used - we use asserts in tests
+    "B601",  # paramiko_calls - not applicable
+]
+
+# =============================================================================
+# pytest - Testing Configuration
+# =============================================================================
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "-W", "default",
+    "--cov=.",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--cov-config=pyproject.toml",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow running tests",
+    "requires_db: Tests that require database connection",
+]
+
+# =============================================================================
+# Coverage - Code Coverage Configuration
+# =============================================================================
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "tests/*",
+    ".venv/*",
+    "venv/*",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+]
+branch = true
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
