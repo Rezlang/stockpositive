@@ -1,7 +1,7 @@
 from typing import List, Optional
 from fastapi import Depends, HTTPException, status
 from ORM.userORM import UserORM
-from services.auth_service.auth_service import get_current_active_user
+from services.authService.authService import get_current_active_user
 
 
 def require_permissions(required_permissions: List[str]):

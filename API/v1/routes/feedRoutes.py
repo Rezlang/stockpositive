@@ -1,15 +1,21 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
-from typing import List
+from typing import List, Annotated
 
 from models.userFeed import UserFeedCreate, UserFeedResponse, UserFeedUpdate
-from services.db_service.database import get_db
-from services.auth_service.auth_service import get_current_active_user
-from services.auth_service.permission_checkers import require_permissions, require_permission_with_max
+from services.dbService.database import get_db
+from services.authService.authService import get_current_active_user
+from services.authService.permissionCheckers import require_permissions, require_permission_with_max
+from services.dbService.repositories import get_feed_repository, OwnedResourceRepository
 from ORM.userFeedORM import UserFeedORM
 from ORM.userORM import UserORM
 
 router = APIRouter()
+
+FeedRepo = Annotated[
+    OwnedResourceRepository[UserFeedORM],
+    Depends(get_feed_repository)
+]
 
 
 @router.post("/add_feed",
@@ -17,19 +23,14 @@ router = APIRouter()
              dependencies=[require_permission_with_max("ADD.FEED", value_getter=lambda u: len(u.feeds) + 1)])
 def add_feed(
     feed_data: UserFeedCreate,
-    current_user: UserORM = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    repo: FeedRepo
 ):
     new_feed = UserFeedORM(
-        user_id=current_user.id,
         feedname=feed_data.feedname,
         stocks=feed_data.stocks,
         sources=feed_data.sources
     )
-    db.add(new_feed)
-    db.commit()
-    db.refresh(new_feed)
-    return new_feed
+    return repo.create_owned(new_feed)
 
 
 @router.delete("/delete_feed/{feed_id}",
@@ -37,18 +38,9 @@ def add_feed(
                dependencies=[require_permissions(["DELETE.FEED"])])
 def delete_feed(
     feed_id: int,
-    current_user: UserORM = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    repo: FeedRepo
 ):
-    feed = db.get(UserFeedORM, feed_id)
-    if not feed:
-        raise HTTPException(status_code=404, detail="Feed not found")
-    if feed.user_id != current_user.id:
-        raise HTTPException(
-            status_code=403, detail="Not authorized to delete this feed")
-
-    db.delete(feed)
-    db.commit()
+    repo.delete_owned(feed_id)
     return None
 
 
@@ -58,24 +50,14 @@ def delete_feed(
 def edit_feed(
     feed_id: int,
     feed_update: UserFeedUpdate,
-    current_user: UserORM = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    repo: FeedRepo
 ):
-    feed = db.get(UserFeedORM, feed_id)
-    if not feed:
-        raise HTTPException(status_code=404, detail="Feed not found")
-    if feed.user_id != current_user.id:
-        raise HTTPException(
-            status_code=403, detail="Not authorized to edit this feed")
+    def apply_updates(feed: UserFeedORM):
+        feed.feedname = feed_update.feedname or feed.feedname
+        feed.stocks = feed_update.stocks or feed.stocks
+        feed.sources = feed_update.sources or feed.sources
 
-    feed.feedname = feed_update.feedname or feed.feedname
-    feed.stocks = feed_update.stocks or feed.stocks
-    feed.sources = feed_update.sources or feed.sources
-
-    db.add(feed)
-    db.commit()
-    db.refresh(feed)
-    return feed
+    return repo.update_owned(feed_id, apply_updates)
 
 
 @router.get("/get_feeds",

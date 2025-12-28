@@ -1,7 +1,7 @@
 from sqlmodel import Session, select, or_
 from ORM.userORM import UserORM
 from models.user import UserUpdate, UserCreate
-from services.auth_service.auth_service import get_password_hash
+from services.authService.authService import get_password_hash
 from fastapi import HTTPException
 from typing import Optional
 

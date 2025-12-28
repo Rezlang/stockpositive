@@ -1,0 +1,6 @@
+Making a mapping request: [{'idType': 'ID_BB_GLOBAL', 'idValue': '0HD6', 'exchCode': 'US'}]
+Mapping response: [
+  {
+    "error": "Invalid idValue format"
+  }
+]

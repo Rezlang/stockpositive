@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from ORM.newsArticleORM import NewsArticleORM
-from services.db_service.database import get_db
+from services.dbService.database import get_db
 from fastapi import Depends
 
 

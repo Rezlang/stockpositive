@@ -6,9 +6,9 @@ from typing import List
 
 from models.token import Token
 from models.user import UserCreate, UserResponse
-from services.db_service.database import get_db
-from services.db_service.crud.user_crud import create_user, get_user_by_email
-from services.auth_service.auth_service import (
+from services.dbService.database import get_db
+from services.dbService.crud.userCrud import create_user, get_user_by_email
+from services.authService.authService import (
     verify_password,
     create_access_token,
     get_current_active_user,

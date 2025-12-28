@@ -4,12 +4,14 @@ from sqlalchemy.orm import Session
 from models.newsResponse import NewsResponse
 from models.newsArticle import NewsArticle
 from ORM.newsArticleORM import NewsArticleORM
-from services.retrieve_news import retrieve_news
-from services.db_service.crud.news_insert import create_news_article
-from services.db_service.crud.news_get import get_news_for_feed
-from services.db_service.database import get_db
+from ORM.userORM import UserORM
+from services.retrieveNews import retrieve_news
+from services.dbService.crud.newsInsert import create_news_article
+from services.dbService.crud.newsGet import get_news_for_feed
+from services.dbService.database import get_db
 from fastapi import Depends
-from services.auth_service.permission_checkers import require_permissions
+from services.authService.permissionCheckers import require_permissions
+from services.authService.authService import get_current_active_user
 
 router = APIRouter()
 
@@ -38,8 +40,9 @@ def load_market_news(
             dependencies=[require_permissions(["GET.NEWS"])])
 def get_market_news(
     feedId: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: UserORM = Depends(get_current_active_user)
 ):
-    news = get_news_for_feed(feedId, db)
+    news = get_news_for_feed(feedId, db, current_user.id)
 
     return news

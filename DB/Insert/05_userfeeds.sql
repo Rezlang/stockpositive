@@ -1,6 +1,6 @@
 INSERT INTO userfeeds (user_id, feedname, stocks, sources)
 VALUES 
-(1, 'Tech Stocks', ARRAY['AAPL','GOOG','MSFT'], ARRAY['Yahoo Finance','Bloomberg']),
+(1, 'Tech Stocks', ARRAY['AAPL','GOOG','MSFT'], ARRAY['ExampleSource1','ExampleSource2']),
 (2, 'Energy Stocks', ARRAY['XOM','CVX'], ARRAY['Reuters','CNBC']),
 (3, 'Crypto Watch', ARRAY['BTC','ETH'], ARRAY['CoinMarketCap','Binance']),
 (1, 'Healthcare Stocks', ARRAY['PFE','JNJ'], ARRAY['Yahoo Finance','Fool.com']),

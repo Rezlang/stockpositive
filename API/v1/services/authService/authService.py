@@ -5,7 +5,7 @@ import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import Session, select
-from services.db_service.database import get_db
+from services.dbService.database import get_db
 from ORM.userORM import UserORM
 from dotenv import load_dotenv
 import os

@@ -22,7 +22,7 @@ INSERT INTO news (
     ARRAY['Author One'],
     ARRAY['AAPL'],
     '2025-12-21 10:00:00',
-    'ExampleSource',
+    'ExampleSource1',
     '0.75',
     'AI summary for test article 1.'
 ),
@@ -36,7 +36,7 @@ INSERT INTO news (
     ARRAY['Author Two'],
     ARRAY['GOOG'],
     '2025-12-21 11:00:00',
-    'ExampleSource',
+    'ExampleSource2',
     '-0.2',
     'AI summary for test article 2.'
 );
