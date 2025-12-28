@@ -37,10 +37,14 @@ def get_db() -> Generator[Session, None, None]:
 
 def test_connection():
     """Test database connection"""
-    with Session(engine) as session:
-        session.exec(text("SELECT 1"))
-    print("DATABASE CONNECTION OK")
+    try:
+        with Session(engine) as session:
+            session.exec(text("SELECT 1"))
+        print("DATABASE CONNECTION OK")
+    except Exception as e:
+        print(f"DATABASE CONNECTION WARNING: {e}")
+        # Don't fail on import if DB is not available (e.g., during CI setup)
 
 
-# Run test on import (optional)
+# Run test on import (optional, won't fail if DB unavailable)
 test_connection()
