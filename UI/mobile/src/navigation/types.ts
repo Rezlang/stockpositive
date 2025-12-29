@@ -1,7 +1,8 @@
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 
 export type RootTabParamList = {
-  Home: undefined;
+  News: undefined;
+  Feeds: undefined;
   Profile: undefined;
 };
 
