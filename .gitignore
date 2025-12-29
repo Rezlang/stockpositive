@@ -100,3 +100,13 @@ pnpm-lock.yaml
 # Misc
 *.bak
 *.tmp
+
+# Mobile app (React Native/Expo)
+/UI/mobile/node_modules/
+/UI/mobile/.expo/
+/UI/mobile/.expo-shared/
+/UI/mobile/dist/
+
+# Web app
+/UI/web/node_modules/
+/UI/web/dist/
