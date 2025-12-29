@@ -10,15 +10,17 @@ class UserORM(Base):
 
     id = Column(Integer, primary_key=True)
     usergroup_id = Column(Integer, ForeignKey("usergroups.id"), nullable=False)
-    username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(255), unique=True, nullable=False)
+    username = Column(String(50), unique=True, nullable=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
     phone_number = Column(String(20))
-    hashed_password = Column(String(255), nullable=False)
+    hashed_password = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
+    is_superuser = Column(Boolean, default=False, nullable=False)
+    is_verified = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     usergroup = relationship("UserGroupORM", backref="users")
-
+    oauth_accounts = relationship("OAuthAccountORM", back_populates="user", cascade="all, delete-orphan")
     feeds = relationship("UserFeedORM", back_populates="user", cascade="all, delete-orphan")
 
     @property

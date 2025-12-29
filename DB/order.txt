@@ -4,3 +4,4 @@
 04_usergroup_permissions.sql
 05_userfeeds.sql
 06_news.sql
+07_oauth_accounts.sql
