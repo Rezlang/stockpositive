@@ -60,7 +60,9 @@ def _query_articles(
     # Apply source filter only if sources are specified
     # Empty list = "all sources" (whitelist all)
     if sources:
-        db_source_names = [DOMAIN_TO_SOURCE_NAME.get(s.lower(), normalize_source_name(s)) for s in sources]
+        db_source_names = [
+            DOMAIN_TO_SOURCE_NAME.get(s.lower(), normalize_source_name(s)) for s in sources
+        ]
         statement = statement.where(NewsArticleORM.sourcename.in_(db_source_names))
 
     # Apply cursor pagination (get articles OLDER than before_date)
@@ -93,7 +95,10 @@ def _create_random_batches(
     random.shuffle(shuffled_sources)
 
     # If everything fits in one call, return single batch
-    if len(shuffled_symbols) <= MAX_SYMBOLS_PER_API_CALL and len(shuffled_sources) <= MAX_SOURCES_PER_API_CALL:
+    if (
+        len(shuffled_symbols) <= MAX_SYMBOLS_PER_API_CALL
+        and len(shuffled_sources) <= MAX_SOURCES_PER_API_CALL
+    ):
         return [(shuffled_symbols, shuffled_sources)]
 
     # Split into 2 batches
@@ -188,7 +193,9 @@ def get_news_for_feed(
 ) -> PaginatedNewsResponse:
     from services.dbService.repositories import OwnedResourceRepository
 
-    logger.info(f"Fetching news for feedId={feedId}, userId={currentUserId}, beforeDate={beforeDate}")
+    logger.info(
+        f"Fetching news for feedId={feedId}, userId={currentUserId}, beforeDate={beforeDate}"
+    )
 
     # 1. Get the feed (with ownership check)
     feedRepo = OwnedResourceRepository(UserFeedORM, db, currentUserId)
@@ -201,9 +208,7 @@ def get_news_for_feed(
 
     # 2. Query DB for 2 * PAGE_SIZE articles (to check if we have enough remaining)
     # Empty symbols = all stocks, empty sources = all sources
-    articles = _query_articles(
-        db, symbols, sources, beforeDate, limit=2 * PAGE_SIZE
-    )
+    articles = _query_articles(db, symbols, sources, beforeDate, limit=2 * PAGE_SIZE)
 
     # 4. Deduplicate by article ID
     deduplicated = _deduplicate_by_id(articles)
@@ -215,9 +220,7 @@ def get_news_for_feed(
         print(f"Stored {stored} new articles from API")
 
         # Re-query after fetching
-        articles = _query_articles(
-            db, symbols, sources, beforeDate, limit=2 * PAGE_SIZE
-        )
+        articles = _query_articles(db, symbols, sources, beforeDate, limit=2 * PAGE_SIZE)
         deduplicated = _deduplicate_by_id(articles)
 
     # 6. Take first PAGE_SIZE articles for response
@@ -238,7 +241,9 @@ def get_news_for_feed(
     # 8. If < PAGE_SIZE remaining after returning first batch, fetch more (synchronous, after building response)
     needBackgroundFetch = len(remainingArticles) < PAGE_SIZE and len(responseArticles) == PAGE_SIZE
     if needBackgroundFetch:
-        logger.info(f"Only {len(remainingArticles)} articles remaining, fetching more for next request...")
+        logger.info(
+            f"Only {len(remainingArticles)} articles remaining, fetching more for next request..."
+        )
         _fetch_and_store_articles(db, symbols, sources)
 
     logger.info(f"Returning {len(responseArticles)} articles, hasMore={hasMore}")

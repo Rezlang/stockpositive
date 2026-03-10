@@ -33,8 +33,7 @@ def load_market_news(
     for article in articles:
         create_news_article(article, db)
 
-    articles = [NewsArticle.model_validate(
-        a, from_attributes=True) for a in articles]
+    articles = [NewsArticle.model_validate(a, from_attributes=True) for a in articles]
 
     return articles
 
