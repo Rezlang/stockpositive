@@ -5,7 +5,7 @@ from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
-from fastapi import HTTPException, Query
+from fastapi import HTTPException
 
 from ORM.newsArticleORM import NewsArticleORM
 
@@ -26,19 +26,29 @@ def normalize_source_name(source_name: str) -> str | None:
 
 def retrieve_news(
     source: str = "market",
-    symbols: list[str] | None = Query(default=None),
+    symbols: list[str] | None = None,
+    domainurls: list[str] | None = None,
 ):
     params = {
         "apikey": NEWS_API_KEY,
         "q": source,
         "language": "en",
         "sort": "pubdateasc",
+        "removeduplicate": 1,
     }
     if symbols:
         params["symbol"] = ",".join(symbols)
+    # Note: domainurl filter is very restrictive - only use if explicitly needed
+    # When combined with symbol, articles must match BOTH criteria
+    if domainurls:
+        params["domainurl"] = ",".join(domainurls)
 
     try:
+        print(f"API Request URL: {NEWS_API_URL}")
+        print(f"API Request params: {params}")
         response = requests.get(NEWS_API_URL, params=params, timeout=10)
+        print(f"API Response status: {response.status_code}")
+        print(f"API Response: {response.text[:500] if response.text else 'empty'}")
         response.raise_for_status()
     except requests.RequestException as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc

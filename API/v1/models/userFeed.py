@@ -15,19 +15,8 @@ class UserFeedCreate(BaseModel):
             raise ValueError("feedname cannot be empty")
         return v
 
-    @field_validator("stocks")
-    @classmethod
-    def stocks_not_empty(cls, v: list[str]) -> list[str]:
-        if not v:
-            raise ValueError("stocks list cannot be empty")
-        return v
-
-    @field_validator("sources")
-    @classmethod
-    def sources_not_empty(cls, v: list[str]) -> list[str]:
-        if not v:
-            raise ValueError("sources list cannot be empty")
-        return v
+    # Empty stocks list means "all stocks" (no stock filter)
+    # Empty sources list means "all sources" (no source filter)
 
 
 class UserFeedUpdate(BaseModel):

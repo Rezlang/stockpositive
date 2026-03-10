@@ -94,9 +94,13 @@ export function SourceCheckbox({
         })}
       </View>
 
-      {error && (
+      {error ? (
         <ThemedText variant="caption" color="error" style={styles.error}>
           {error}
+        </ThemedText>
+      ) : (
+        <ThemedText variant="caption" color="muted" style={styles.helperText}>
+          Leave empty to receive news from all sources
         </ThemedText>
       )}
     </View>
@@ -138,6 +142,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   error: {
+    marginTop: 8,
+  },
+  helperText: {
     marginTop: 8,
   },
 });

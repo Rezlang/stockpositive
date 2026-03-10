@@ -30,27 +30,27 @@ def add_feed(feed_data: UserFeedCreate, repo: FeedRepo):
 
 
 @router.delete(
-    "/delete_feed/{feed_id}",
+    "/delete_feed/{feedId}",
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[require_permissions(["DELETE.FEED"])],
 )
-def delete_feed(feed_id: int, repo: FeedRepo):
-    repo.delete_owned(feed_id)
+def delete_feed(feedId: int, repo: FeedRepo):
+    repo.delete_owned(feedId)
     return
 
 
 @router.put(
-    "/edit_feed/{feed_id}",
+    "/edit_feed/{feedId}",
     response_model=UserFeedResponse,
     dependencies=[require_permissions(["EDIT.FEED"])],
 )
-def edit_feed(feed_id: int, feed_update: UserFeedUpdate, repo: FeedRepo):
-    def apply_updates(feed: UserFeedORM):
-        feed.feedname = feed_update.feedname or feed.feedname
-        feed.stocks = feed_update.stocks or feed.stocks
-        feed.sources = feed_update.sources or feed.sources
+def edit_feed(feedId: int, feedUpdate: UserFeedUpdate, repo: FeedRepo):
+    def applyUpdates(feed: UserFeedORM):
+        feed.feedname = feedUpdate.feedname or feed.feedname
+        feed.stocks = feedUpdate.stocks or feed.stocks
+        feed.sources = feedUpdate.sources or feed.sources
 
-    return repo.update_owned(feed_id, apply_updates)
+    return repo.update_owned(feedId, applyUpdates)
 
 
 @router.get(

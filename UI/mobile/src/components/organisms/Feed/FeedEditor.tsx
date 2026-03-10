@@ -69,12 +69,8 @@ export function FeedEditor({
     if (!feedname.trim()) {
       newErrors.feedname = 'Feed name is required';
     }
-    if (stocks.length === 0) {
-      newErrors.stocks = 'At least one stock is required';
-    }
-    if (sources.length === 0) {
-      newErrors.sources = 'At least one source is required';
-    }
+    // Empty stocks = all stocks (whitelist all)
+    // Empty sources = all sources (whitelist all)
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

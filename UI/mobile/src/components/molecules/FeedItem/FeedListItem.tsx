@@ -59,11 +59,11 @@ export function FeedListItem({
         </ThemedText>
         <View style={styles.meta}>
           <ThemedText variant="caption" color="muted">
-            {feed.stocks.length} stocks
+            {feed.stocks.length === 0 ? 'All stocks' : `${feed.stocks.length} stocks`}
           </ThemedText>
           <View style={styles.dot} />
           <ThemedText variant="caption" color="muted">
-            {feed.sources.length} sources
+            {feed.sources.length === 0 ? 'All sources' : `${feed.sources.length} sources`}
           </ThemedText>
         </View>
       </View>

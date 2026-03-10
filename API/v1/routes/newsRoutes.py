@@ -1,7 +1,10 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from models.newsArticle import NewsArticle
+from models.newsResponse import PaginatedNewsResponse
 from ORM.newsArticleORM import NewsArticleORM
 from ORM.userORM import UserORM
 from services.authService.authService import get_current_active_user
@@ -30,19 +33,21 @@ def load_market_news(
     for article in articles:
         create_news_article(article, db)
 
-    articles = [NewsArticle.model_validate(a, from_attributes=True) for a in articles]
+    articles = [NewsArticle.model_validate(
+        a, from_attributes=True) for a in articles]
 
     return articles
 
 
 @router.get(
-    "/get-news", response_model=list[NewsArticle], dependencies=[require_permissions(["GET.NEWS"])]
+    "/get-news",
+    response_model=PaginatedNewsResponse,
+    dependencies=[require_permissions(["GET.NEWS"])],
 )
 def get_market_news(
     feedId: int,
+    beforeDate: datetime | None = None,
     db: Session = Depends(get_db),
-    current_user: UserORM = Depends(get_current_active_user),
+    currentUser: UserORM = Depends(get_current_active_user),
 ):
-    news = get_news_for_feed(feedId, db, current_user.id)
-
-    return news
+    return get_news_for_feed(feedId, db, currentUser.id, beforeDate)

@@ -95,7 +95,7 @@ export function FeedSelector({
                     {item.feedname}
                   </ThemedText>
                   <ThemedText variant="caption" color="muted">
-                    {item.stocks.length} stocks · {item.sources.length} sources
+                    {item.stocks.length === 0 ? 'All stocks' : `${item.stocks.length} stocks`} · {item.sources.length === 0 ? 'All sources' : `${item.sources.length} sources`}
                   </ThemedText>
                 </View>
                 {item.id === activeFeed?.id && (

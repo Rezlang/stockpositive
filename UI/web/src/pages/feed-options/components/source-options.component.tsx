@@ -155,6 +155,9 @@ const SourceOptions: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 500 }}>
+      <Typography level="body-sm" sx={{ mb: 2, color: "neutral.500" }}>
+        Leave all sources unselected to receive news from all sources
+      </Typography>
       {SOURCEOPTIONS.map((node) => renderNode(node))}
       <Box
         sx={{

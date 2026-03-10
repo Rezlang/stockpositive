@@ -97,9 +97,13 @@ export function StockTagInput({
         />
       </View>
 
-      {error && (
+      {error ? (
         <ThemedText variant="caption" color="error" style={styles.error}>
           {error}
+        </ThemedText>
+      ) : (
+        <ThemedText variant="caption" color="muted" style={styles.helperText}>
+          Leave empty to receive news for all stocks
         </ThemedText>
       )}
 
@@ -157,6 +161,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   error: {
+    marginTop: 4,
+  },
+  helperText: {
     marginTop: 4,
   },
   suggestions: {
